@@ -9,26 +9,23 @@ import com.alan.common.ResultUtils;
 import com.alan.constant.UserConstant;
 import com.alan.exception.BusinessException;
 import com.alan.exception.ThrowUtils;
+import com.alan.model.dto.post.PostAddRequest;
+import com.alan.model.dto.post.PostEditRequest;
+import com.alan.model.dto.post.PostQueryRequest;
 import com.alan.model.dto.post.PostUpdateRequest;
 import com.alan.model.entity.Post;
 import com.alan.model.entity.User;
 import com.alan.model.vo.PostVO;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.alan.model.dto.post.PostAddRequest;
-import com.alan.model.dto.post.PostEditRequest;
-import com.alan.model.dto.post.PostQueryRequest;
 import com.alan.service.PostService;
 import com.alan.service.UserService;
-import java.util.List;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * 帖子接口
@@ -207,24 +204,6 @@ public class PostController {
         return ResultUtils.success(postService.getPostVOPage(postPage, request));
     }
 
-    // endregion
-
-    /**
-     * 分页搜索（从 ES 查询，封装类）
-     *
-     * @param postQueryRequest
-     * @param request
-     * @return
-     */
-    @PostMapping("/search/page/vo")
-    public BaseResponse<Page<PostVO>> searchPostVOByPage(@RequestBody PostQueryRequest postQueryRequest,
-            HttpServletRequest request) {
-        long size = postQueryRequest.getPageSize();
-        // 限制爬虫
-        ThrowUtils.throwIf(size > 20, ErrorCode.PARAMS_ERROR);
-        Page<Post> postPage = postService.searchFromEs(postQueryRequest);
-        return ResultUtils.success(postService.getPostVOPage(postPage, request));
-    }
 
     /**
      * 编辑（用户）
