@@ -7,21 +7,19 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 文件上传业务类型枚举
- *
-
+ * 审核状态枚举
  */
-public enum FileUploadBizEnum {
+public enum ReviewStatusEnum {
 
-    USER_AVATAR("用户头像", "user_avatar"),
-    APP_ICON("应用图标", "app_icon"),
-    SCORING_RESULT_PICTURE("评分结果图片", "scoring_result_picture");
+    REVIEWING("待审核", 0),
+    PASS("通过", 1),
+    REJECT("拒绝", 2);
 
     private final String text;
 
-    private final String value;
+    private final int value;
 
-    FileUploadBizEnum(String text, String value) {
+    ReviewStatusEnum(String text, int value) {
         this.text = text;
         this.value = value;
     }
@@ -31,7 +29,7 @@ public enum FileUploadBizEnum {
      *
      * @return
      */
-    public static List<String> getValues() {
+    public static List<Integer> getValues() {
         return Arrays.stream(values()).map(item -> item.value).collect(Collectors.toList());
     }
 
@@ -41,19 +39,19 @@ public enum FileUploadBizEnum {
      * @param value
      * @return
      */
-    public static FileUploadBizEnum getEnumByValue(String value) {
+    public static ReviewStatusEnum getEnumByValue(Integer value) {
         if (ObjectUtils.isEmpty(value)) {
             return null;
         }
-        for (FileUploadBizEnum anEnum : FileUploadBizEnum.values()) {
-            if (anEnum.value.equals(value)) {
+        for (ReviewStatusEnum anEnum : ReviewStatusEnum.values()) {
+            if (anEnum.value == value) {
                 return anEnum;
             }
         }
         return null;
     }
 
-    public String getValue() {
+    public int getValue() {
         return value;
     }
 

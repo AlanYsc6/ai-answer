@@ -7,21 +7,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * 文件上传业务类型枚举
- *
-
+ * 应用类型枚举
  */
-public enum FileUploadBizEnum {
+public enum AppTypeEnum {
 
-    USER_AVATAR("用户头像", "user_avatar"),
-    APP_ICON("应用图标", "app_icon"),
-    SCORING_RESULT_PICTURE("评分结果图片", "scoring_result_picture");
+    SCORE("得分类", 0),
+    TEST("测评类", 1);
 
     private final String text;
 
-    private final String value;
+    private final int value;
 
-    FileUploadBizEnum(String text, String value) {
+    AppTypeEnum(String text, int value) {
         this.text = text;
         this.value = value;
     }
@@ -31,7 +28,7 @@ public enum FileUploadBizEnum {
      *
      * @return
      */
-    public static List<String> getValues() {
+    public static List<Integer> getValues() {
         return Arrays.stream(values()).map(item -> item.value).collect(Collectors.toList());
     }
 
@@ -41,19 +38,19 @@ public enum FileUploadBizEnum {
      * @param value
      * @return
      */
-    public static FileUploadBizEnum getEnumByValue(String value) {
+    public static AppTypeEnum getEnumByValue(Integer value) {
         if (ObjectUtils.isEmpty(value)) {
             return null;
         }
-        for (FileUploadBizEnum anEnum : FileUploadBizEnum.values()) {
-            if (anEnum.value.equals(value)) {
+        for (AppTypeEnum anEnum : AppTypeEnum.values()) {
+            if (anEnum.value == value) {
                 return anEnum;
             }
         }
         return null;
     }
 
-    public String getValue() {
+    public int getValue() {
         return value;
     }
 
