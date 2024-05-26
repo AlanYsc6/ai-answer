@@ -4,29 +4,28 @@ import cn.hutool.core.io.FileUtil;
 import com.alan.common.BaseResponse;
 import com.alan.common.ErrorCode;
 import com.alan.common.ResultUtils;
-import com.alan.constant.FileConstant;
 import com.alan.exception.BusinessException;
 import com.alan.model.dto.file.UploadFileRequest;
 import com.alan.model.entity.User;
-import com.alan.manager.CosManager;
 import com.alan.model.enums.FileUploadBizEnum;
 import com.alan.service.UserService;
-import java.io.File;
-import java.util.Arrays;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import com.alan.utils.AliOssUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.UUID;
+
 /**
  * 文件接口
  *
-
  */
 @RestController
 @RequestMapping("/file")
@@ -37,7 +36,7 @@ public class FileController {
     private UserService userService;
 
     @Resource
-    private CosManager cosManager;
+    private AliOssUtil aliOssUtil;
 
     /**
      * 文件上传
@@ -57,31 +56,26 @@ public class FileController {
         }
         validFile(multipartFile, fileUploadBizEnum);
         User loginUser = userService.getLoginUser(request);
-        // 文件目录：根据业务、用户来划分
-        String uuid = RandomStringUtils.randomAlphanumeric(8);
-        String filename = uuid + "-" + multipartFile.getOriginalFilename();
-        String filepath = String.format("/%s/%s/%s", fileUploadBizEnum.getValue(), loginUser.getId(), filename);
-        File file = null;
+        log.info("OSS文件上传:{}", multipartFile.getOriginalFilename());
         try {
-            // 上传文件
-            file = File.createTempFile(filepath, null);
-            multipartFile.transferTo(file);
-            cosManager.putObject(filepath, file);
-            // 返回可访问地址
-            return ResultUtils.success(FileConstant.COS_HOST + filepath);
-        } catch (Exception e) {
-            log.error("file upload error, filepath = " + filepath, e);
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传失败");
-        } finally {
-            if (file != null) {
-                // 删除临时文件
-                boolean delete = file.delete();
-                if (!delete) {
-                    log.error("file delete error, filepath = {}", filepath);
-                }
+            //获取原始文件名
+            String originalFilename = multipartFile.getOriginalFilename();
+            //截取原始文件名的后缀
+            String extension = null;
+            if (originalFilename != null) {
+                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
             }
+            //构建新文件名称
+            String objectName = aliOssUtil.getFolderName()+ UUID.randomUUID().toString() + extension;
+            //文件请求路径
+            String filePath = aliOssUtil.upload(multipartFile.getBytes(), objectName);
+            return ResultUtils.success(filePath);
+        } catch (IOException e) {
+            log.error("文件上传失败",e);
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "上传失败");
         }
     }
+
 
     /**
      * 校验文件

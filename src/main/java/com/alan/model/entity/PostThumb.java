@@ -11,7 +11,6 @@ import lombok.Data;
 /**
  * 帖子点赞
  *
-
  */
 @TableName(value = "post_thumb")
 @Data

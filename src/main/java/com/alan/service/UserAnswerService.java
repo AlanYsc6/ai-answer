@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 用户答案服务
  *
-
  */
 public interface UserAnswerService extends IService<UserAnswer> {
 

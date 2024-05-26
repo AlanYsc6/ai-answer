@@ -30,7 +30,6 @@ import java.util.List;
 /**
  * 评分结果接口
  *
-
  */
 @RestController
 @RequestMapping("/scoringResult")

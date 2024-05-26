@@ -7,7 +7,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 /**
  * 帖子点赞服务
  *
-
  */
 public interface PostThumbService extends IService<PostThumb> {
 

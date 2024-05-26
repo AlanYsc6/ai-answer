@@ -10,7 +10,6 @@ import java.util.Date;
 /**
  * 应用视图
  *
-
  */
 @Data
 public class AppVO implements Serializable {

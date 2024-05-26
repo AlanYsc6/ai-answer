@@ -4,22 +4,22 @@ import com.alan.common.BaseResponse;
 import com.alan.common.ErrorCode;
 import com.alan.common.ResultUtils;
 import com.alan.exception.BusinessException;
-import com.alan.model.entity.User;
 import com.alan.model.dto.postthumb.PostThumbAddRequest;
+import com.alan.model.entity.User;
 import com.alan.service.PostThumbService;
 import com.alan.service.UserService;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 帖子点赞接口
  *
-
  */
 @RestController
 @RequestMapping("/post_thumb")

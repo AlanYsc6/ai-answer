@@ -11,7 +11,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 /**
  * 帖子收藏服务
  *
-
  */
 public interface PostFavourService extends IService<PostFavour> {
 

@@ -16,7 +16,6 @@ spring:
     # 30 天过期
     timeout: 2592000
   # 数据库配置
-  # todo 需替换配置
   datasource:
     driver-class-name: ${ai.datasource.driver-class-name}
     url: jdbc:mysql://${ai.datasource.host}:${ai.datasource.port}/${ai.datasource.database}
@@ -72,15 +71,6 @@ ai:
     endpoint: ${sky.alioss.endpoint}
     bucket-name: ${sky.alioss.bucket-name}
     folder-name: ${sky.alioss.folder-name}
-
-# 对象存储
-# todo 需替换配置
-cos:
-  client:
-    accessKey: xxx
-    secretKey: xxx
-    region: xxx
-    bucket: xxx
 # 接口文档配置
 knife4j:
   enable: true

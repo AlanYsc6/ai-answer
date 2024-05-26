@@ -12,7 +12,6 @@ import lombok.Data;
 /**
  * 帖子
  *
-
  */
 @TableName(value = "post")
 @Data

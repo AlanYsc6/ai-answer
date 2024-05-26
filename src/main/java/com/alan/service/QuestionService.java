@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 题目服务
  *
-
  */
 public interface QuestionService extends IService<Question> {
 

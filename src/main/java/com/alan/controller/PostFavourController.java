@@ -6,27 +6,27 @@ import com.alan.common.ResultUtils;
 import com.alan.exception.BusinessException;
 import com.alan.exception.ThrowUtils;
 import com.alan.model.dto.post.PostQueryRequest;
+import com.alan.model.dto.postfavour.PostFavourAddRequest;
+import com.alan.model.dto.postfavour.PostFavourQueryRequest;
 import com.alan.model.entity.Post;
 import com.alan.model.entity.User;
 import com.alan.model.vo.PostVO;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.alan.model.dto.postfavour.PostFavourAddRequest;
-import com.alan.model.dto.postfavour.PostFavourQueryRequest;
 import com.alan.service.PostFavourService;
 import com.alan.service.PostService;
 import com.alan.service.UserService;
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
 /**
  * 帖子收藏接口
  *
-
  */
 @RestController
 @RequestMapping("/post_favour")

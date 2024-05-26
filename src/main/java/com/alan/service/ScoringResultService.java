@@ -12,7 +12,6 @@ import javax.servlet.http.HttpServletRequest;
 /**
  * 评分结果服务
  *
-
  */
 public interface ScoringResultService extends IService<ScoringResult> {
 
