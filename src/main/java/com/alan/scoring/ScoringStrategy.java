@@ -18,5 +18,5 @@ public interface ScoringStrategy {
      * @return 用户答题记录
      * @throws Exception
      */
-    UserAnswer doscore(List<String> choices, App app) throws Exception;
+    UserAnswer doScore(List<String> choices, App app) throws Exception;
 }

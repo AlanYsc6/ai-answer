@@ -38,7 +38,7 @@ public class CustomScoreScoringStrategy implements ScoringStrategy {
      * @throws Exception
      */
     @Override
-    public UserAnswer doscore(List<String> choices, App app) throws Exception {
+    public UserAnswer doScore(List<String> choices, App app) throws Exception {
         Long appId = app.getId();
         // 1. 根据 id 查询到题目和题目结果信息（按分数降序排序）
         Question question = questionService.getOne(

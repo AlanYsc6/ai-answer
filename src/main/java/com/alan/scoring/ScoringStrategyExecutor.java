@@ -41,7 +41,7 @@ public class ScoringStrategyExecutor {
             if (strategy.getClass().isAnnotationPresent(ScoringStrategyConfig.class)) {
                 ScoringStrategyConfig scoringStrategyConfig = strategy.getClass().getAnnotation(ScoringStrategyConfig.class);
                 if (scoringStrategyConfig.appType() == appType && scoringStrategyConfig.scoringStrategy() == appScoringStrategy) {
-                    return strategy.doscore(choiceList, app);
+                    return strategy.doScore(choiceList, app);
                 }
             }
         }

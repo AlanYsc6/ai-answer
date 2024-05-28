@@ -39,7 +39,7 @@ public class CustomTestScoringStrategy implements ScoringStrategy {
      * @throws Exception
      */
     @Override
-    public UserAnswer doscore(List<String> choices, App app) throws Exception {
+    public UserAnswer doScore(List<String> choices, App app) throws Exception {
         Long appId = app.getId();
         // 1. 根据 id 查询到应用对应的题目信息和题目所有结果信息
         Question question = questionService.getOne(
