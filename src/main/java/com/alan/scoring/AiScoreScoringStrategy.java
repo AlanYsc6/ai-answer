@@ -17,11 +17,11 @@ import java.util.List;
 
 /**
  * @Author Alan
- * @Date 2024/5/28 20:38
- * @Description 测评类AI评分策略
+ * @Date 2024/5/28 22:48
+ * @Description 得分类AI评分策略
  */
-@ScoringStrategyConfig(appType = 1, scoringStrategy = 1)
-public class AiTestScoringStrategy implements ScoringStrategy {
+@ScoringStrategyConfig(appType = 0, scoringStrategy = 1)
+public class AiScoreScoringStrategy implements ScoringStrategy{
 
     @Resource
     private QuestionService questionService;
@@ -40,12 +40,13 @@ public class AiTestScoringStrategy implements ScoringStrategy {
             "```\n" +
             "\n" +
             "请你根据上述信息，按照以下步骤来对用户进行评价：\n" +
-            "1. 要求：需要给出一个明确的评价结果，包括评价名称（尽量简短）和评价描述（尽量详细，大于 200 字）\n" +
-            "2. 严格按照下面的 json 格式输出评价名称和评价描述\n" +
+            "1. 要求：需要给出一个明确的评价结果，包括评价名称（尽量简短）、评价描述（尽量简短，不超过20字）和评价总分\n" +
+            "2. 严格按照下面的 json 格式输出评价名称、评价描述和评价总分\n" +
             "```\n" +
-            "{\"resultName\": \"评价名称\", \"resultDesc\": \"评价描述\"}\n" +
+            "{\"resultName\": \"评价名称\", \"resultDesc\": \"评价描述\",\"resultScore\":评价总分}\n" +
             "```\n" +
-            "3. 返回格式必须为 JSON 对象";
+            "3.得分规则为：用户回答正确得1分，回答错误得0分。所有题目得分之和即为评价总分\n" +
+            "4. 返回格式必须为 JSON 对象";
 
     @Override
     public UserAnswer doScore(List<String> choices, App app) throws Exception {
