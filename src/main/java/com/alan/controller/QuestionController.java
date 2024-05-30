@@ -20,13 +20,20 @@ import com.alan.service.QuestionService;
 import com.alan.service.UserService;
 import com.alan.utils.ZhiPuAiUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.zhipu.oapi.service.v4.model.ModelData;
+import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 题目接口
@@ -315,4 +322,60 @@ public class QuestionController {
     }
 
     // endregion
+
+    @GetMapping("/ai_generate/sse")
+    public SseEmitter aiGenerateQuestionSSE(AiGenerateQuestionRequest aiGenerateQuestionRequest) {
+        ThrowUtils.throwIf(aiGenerateQuestionRequest == null, ErrorCode.PARAMS_ERROR);
+        // 获取参数
+        Long appId = aiGenerateQuestionRequest.getAppId();
+        int questionNumber = aiGenerateQuestionRequest.getQuestionNumber();
+        int optionNumber = aiGenerateQuestionRequest.getOptionNumber();
+        // 获取应用信息
+        App app = appService.getById(appId);
+        ThrowUtils.throwIf(app == null, ErrorCode.NOT_FOUND_ERROR);
+        // 封装 Prompt
+        String userMessage = getGenerateQuestionUserMessage(app, questionNumber, optionNumber);
+        //建立SSE连接对象，0表示永不超时
+        SseEmitter sseEmitter = new SseEmitter(0L);
+        // AI 生成,SSE流式返回
+        Flowable<ModelData> modelDataFlowable = zhiPuAiUtil.doStreamRequest(GENERATE_QUESTION_SYSTEM_MESSAGE, userMessage, null);
+        //左括号计数器，除了默认值外，当回归为0时，表示左括号等于右括号，可以截取
+        AtomicInteger count = new AtomicInteger(0);
+        //拼接完整题目
+        StringBuilder question = new StringBuilder();
+        modelDataFlowable.observeOn(Schedulers.io())
+                .map(modelData -> modelData.getChoices().get(0).getDelta().getContent())
+                .map(message -> message.replaceAll("\\s", ""))
+                .filter(StringUtils::isNotBlank)
+                .flatMap(message -> {
+                    List<Character> characters = new ArrayList<>();
+                    for (char c : message.toCharArray()) {
+                        characters.add(c);
+                    }
+                    return Flowable.fromIterable(characters);
+                })
+                .doOnNext(c -> {
+                    //如果是"{",计数器+1
+                    if (c == '{') {
+                        count.addAndGet(1);
+                    }
+                    if (count.get() > 0) {
+                        question.append(c);
+                    }
+                    //如果是"}",计数器-1
+                    if (c == '}') {
+                        count.addAndGet(-1);
+                        if (count.get() == 0) {
+                            //拼接题目，并通过SSE返回给前端
+                            sseEmitter.send(JSONUtil.toJsonStr(question.toString()));
+                            //清空题目
+                            question.setLength(0);
+                        }
+                    }
+                })
+                .doOnError((e) -> log.error("SSE异常", e))
+                .doOnComplete(sseEmitter::complete)
+                .subscribe();
+        return sseEmitter;
+    }
 }
