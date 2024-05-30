@@ -32,7 +32,7 @@ public class AiTestScoringStrategy implements ScoringStrategy {
     /**
      * AI 评分系统消息
      */
-    private static final String AI_TEST_SCORING_SYSTEM_MESSAGE = "你是一位严谨的判题专家，我会给你如下信息：\n" +
+    private static final String AI_TEST_SCORING_SYSTEM_MESSAGE = "你是一位严谨的测评类判题专家，我会给你如下信息：\n" +
             "```\n" +
             "应用名称，\n" +
             "【【【应用描述】】】，\n" +
@@ -44,8 +44,7 @@ public class AiTestScoringStrategy implements ScoringStrategy {
             "2. 严格按照下面的 json 格式输出评价名称和评价描述\n" +
             "```\n" +
             "{\"resultName\": \"评价名称\", \"resultDesc\": \"评价描述\"}\n" +
-            "```\n" +
-            "3. 返回格式必须为 JSON 对象";
+            "```";
 
     @Override
     public UserAnswer doScore(List<String> choices, App app) throws Exception {

@@ -1,8 +1,8 @@
 package com.alan.scoring;
 
 import cn.hutool.json.JSONUtil;
-import com.alan.model.dto.question.QuestionAnswerDTO;
 import com.alan.model.dto.question.QuestionContentDTO;
+import com.alan.model.dto.question.QuestionScoreDTO;
 import com.alan.model.entity.App;
 import com.alan.model.entity.Question;
 import com.alan.model.entity.UserAnswer;
@@ -32,22 +32,19 @@ public class AiScoreScoringStrategy implements ScoringStrategy{
     /**
      * AI 评分系统消息
      */
-    private static final String AI_TEST_SCORING_SYSTEM_MESSAGE = "你是一位严谨的判题专家，我会给你如下信息：\n" +
+    private static final String AI_TEST_SCORING_SYSTEM_MESSAGE = "你是一位严谨的得分类判题专家，我会给你如下信息：\n" +
             "```\n" +
             "应用名称，\n" +
             "【【【应用描述】】】，\n" +
-            "题目和用户回答的列表：格式为 [{\"title\": \"题目\",\"answer\": \"用户回答\"}]\n" +
+            "题目和用户得分的列表：格式为 [{\"title\": \"题目\",\"userScore\": 用户得分}]\n" +
             "```\n" +
             "\n" +
             "请你根据上述信息，按照以下步骤来对用户进行评价：\n" +
-            "1. 要求：需要给出一个明确的评价结果，包括评价名称（尽量简短）、评价描述（尽量简短，不超过20字）和评价总分\n" +
-            "2. 严格按照下面的 json 格式输出评价名称、评价描述和评价总分\n" +
+            "1. 要求：需要给出一个明确的评价结果，包括评价名称（尽量简短）、评价描述（小于 20 字）和用户总分（用户得分列表的所有userScore之和）\n" +
+            "2. 严格按照下面的 json 格式输出评价名称和评价描述\n" +
             "```\n" +
-            "{\"resultName\": \"评价名称\", \"resultDesc\": \"评价描述\",\"resultScore\":评价总分}\n" +
-            "```\n" +
-            "3.得分规则为：用户回答正确得1分，回答错误得0分。所有题目得分之和即为评价总分\n" +
-            "4. 返回格式必须为 JSON 对象";
-
+            "{\"resultName\": \"评价名称\", \"resultDesc\": \"评价描述\"，\"resultScore\": \"用户总分\"}\n" +
+            "```";
     @Override
     public UserAnswer doScore(List<String> choices, App app) throws Exception {
         Long appId = app.getId();
@@ -57,10 +54,9 @@ public class AiScoreScoringStrategy implements ScoringStrategy{
         );
         QuestionVO questionVO = QuestionVO.objToVo(question);
         List<QuestionContentDTO> questionContent = questionVO.getQuestionContent();
-
         // 2. 调用 AI 获取结果
         // 封装 Prompt
-        String userMessage = getAiTestScoringUserMessage(app, questionContent, choices);
+        String userMessage = getAiScoreScoringUserMessage(app, questionContent, choices);
         // AI 生成
         String result = zhiPuAiUtil.doSyncStableRequest(AI_TEST_SCORING_SYSTEM_MESSAGE, userMessage);
         // 截取需要的 JSON 信息
@@ -85,18 +81,25 @@ public class AiScoreScoringStrategy implements ScoringStrategy{
      * @param choices
      * @return
      */
-    private String getAiTestScoringUserMessage(App app, List<QuestionContentDTO> questionContentDTOList, List<String> choices) {
+    private String getAiScoreScoringUserMessage(App app, List<QuestionContentDTO> questionContentDTOList, List<String> choices) {
         StringBuilder userMessage = new StringBuilder();
         userMessage.append(app.getAppName()).append("\n");
         userMessage.append(app.getAppDesc()).append("\n");
-        List<QuestionAnswerDTO> questionAnswerDTOList = new ArrayList<>();
+        List<QuestionScoreDTO> questionScoreDTOList = new ArrayList<>();
         for (int i = 0; i < questionContentDTOList.size(); i++) {
-            QuestionAnswerDTO questionAnswerDTO = new QuestionAnswerDTO();
-            questionAnswerDTO.setTitle(questionContentDTOList.get(i).getTitle());
-            questionAnswerDTO.setUserAnswer(choices.get(i));
-            questionAnswerDTOList.add(questionAnswerDTO);
+            QuestionScoreDTO   questionScoreDTO = new QuestionScoreDTO();
+            questionScoreDTO.setTitle(questionContentDTOList.get(i).getTitle());
+            String choice = choices.get(i);
+            List<QuestionContentDTO.Option> options = questionContentDTOList.get(i).getOptions();
+            for (QuestionContentDTO.Option option : options) {
+                if (option.getKey().equals(choice)) {
+                    questionScoreDTO.setUserScore(option.getScore());
+                    break;
+                }
+            }
+            questionScoreDTOList.add(questionScoreDTO);
         }
-        userMessage.append(JSONUtil.toJsonStr(questionAnswerDTOList));
+        userMessage.append(JSONUtil.toJsonStr(questionScoreDTOList));
         return userMessage.toString();
     }
 }
