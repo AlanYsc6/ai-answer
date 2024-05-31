@@ -17,7 +17,6 @@ public class CacheUtils {
                     // 缓存5分钟移除
                     .expireAfterAccess(5L, TimeUnit.MINUTES)
                     .build();
-
     public static String get(String key) {
         return answerCacheMap.getIfPresent(key);
     }
