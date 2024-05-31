@@ -1,5 +1,7 @@
 package com.alan.scoring;
 
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.json.JSONUtil;
 import com.alan.model.dto.question.QuestionContentDTO;
 import com.alan.model.dto.question.QuestionScoreDTO;
@@ -8,6 +10,7 @@ import com.alan.model.entity.Question;
 import com.alan.model.entity.UserAnswer;
 import com.alan.model.vo.QuestionVO;
 import com.alan.service.QuestionService;
+import com.alan.utils.CacheUtils;
 import com.alan.utils.ZhiPuAiUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 
@@ -48,6 +51,18 @@ public class AiScoreScoringStrategy implements ScoringStrategy{
     @Override
     public UserAnswer doScore(List<String> choices, App app) throws Exception {
         Long appId = app.getId();
+        String JSONChoices = JSONUtil.toJsonStr(choices);
+        String cacheKey = buildCacheKey(appId, JSONChoices);
+        String answerJson = CacheUtils.get(cacheKey);
+        //如果有缓存，直接返回
+        if (StrUtil.isNotBlank(answerJson)) {
+            UserAnswer userAnswer = JSONUtil.toBean(answerJson, UserAnswer.class);
+            userAnswer.setAppId(appId);
+            userAnswer.setAppType(app.getAppType());
+            userAnswer.setScoringStrategy(app.getScoringStrategy());
+            userAnswer.setChoices(JSONChoices);
+            return userAnswer;
+        }
         // 1. 根据 id 查询到题目
         Question question = questionService.getOne(
                 Wrappers.lambdaQuery(Question.class).eq(Question::getAppId, appId)
@@ -63,13 +78,14 @@ public class AiScoreScoringStrategy implements ScoringStrategy{
         int start = result.indexOf("{");
         int end = result.lastIndexOf("}");
         String json = result.substring(start, end + 1);
-
+        //缓存结果
+        CacheUtils.put(cacheKey, json);
         // 3. 构造返回值，填充答案对象的属性
         UserAnswer userAnswer = JSONUtil.toBean(json, UserAnswer.class);
         userAnswer.setAppId(appId);
         userAnswer.setAppType(app.getAppType());
         userAnswer.setScoringStrategy(app.getScoringStrategy());
-        userAnswer.setChoices(JSONUtil.toJsonStr(choices));
+        userAnswer.setChoices(JSONUtil.toJsonStr(JSONChoices));
         return userAnswer;
     }
 
@@ -101,5 +117,15 @@ public class AiScoreScoringStrategy implements ScoringStrategy{
         }
         userMessage.append(JSONUtil.toJsonStr(questionScoreDTOList));
         return userMessage.toString();
+    }
+    /**
+     * 构建缓存Key
+     *
+     * @param appId
+     * @param choices
+     * @return
+     */
+    private String buildCacheKey(Long appId, String choices) {
+        return DigestUtil.md5Hex(appId + ":" + choices);
     }
 }

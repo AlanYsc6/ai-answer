@@ -18,6 +18,7 @@ import com.alan.model.vo.QuestionVO;
 import com.alan.service.AppService;
 import com.alan.service.QuestionService;
 import com.alan.service.UserService;
+import com.alan.utils.CacheUtils;
 import com.alan.utils.ZhiPuAiUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhipu.oapi.service.v4.model.ModelData;
@@ -138,6 +139,8 @@ public class QuestionController {
         // 操作数据库
         boolean result = questionService.updateById(question);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        //更新题目成功后清空缓存
+        CacheUtils.clear();
         return ResultUtils.success(true);
     }
 
@@ -251,6 +254,8 @@ public class QuestionController {
         // 操作数据库
         boolean result = questionService.updateById(question);
         ThrowUtils.throwIf(!result, ErrorCode.OPERATION_ERROR);
+        //编辑题目成功后清空缓存
+        CacheUtils.clear();
         return ResultUtils.success(true);
     }
 
