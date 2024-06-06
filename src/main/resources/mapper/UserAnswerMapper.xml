@@ -28,4 +28,12 @@
         resultScore,userId,createTime,
         updateTime,isDelete
     </sql>
+    <select id="doAppAnswerCount" resultType="com.alan.model.dto.statistic.AppAnswerCountDTO">
+        select appId, count(distinct userId) as userCount from user_answer
+        group by appId order by userCount desc limit 10;
+    </select>
+    <select id="doAppAnswerResultCount" resultType="com.alan.model.dto.statistic.AppAnswerResultCountDTO">
+        select resultName, count(resultName) as resultCount from user_answer
+            where appId = #{appId} group by resultName order by resultCount desc;
+    </select>
 </mapper>

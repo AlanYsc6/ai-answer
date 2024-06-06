@@ -1,7 +1,11 @@
 package com.alan.mapper;
 
+import com.alan.model.dto.statistic.AppAnswerCountDTO;
+import com.alan.model.dto.statistic.AppAnswerResultCountDTO;
 import com.alan.model.entity.UserAnswer;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+
+import java.util.List;
 
 /**
 * @author Alan
@@ -11,6 +15,9 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface UserAnswerMapper extends BaseMapper<UserAnswer> {
 
+    List<AppAnswerCountDTO> doAppAnswerCount();
+
+    List<AppAnswerResultCountDTO> doAppAnswerResultCount(Long appId);
 }
 
 
