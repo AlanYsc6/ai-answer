@@ -23,6 +23,7 @@ import com.alan.utils.ZhiPuAiUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zhipu.oapi.service.v4.model.ModelData;
 import io.reactivex.Flowable;
+import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +56,9 @@ public class QuestionController {
 
     @Resource
     private ZhiPuAiUtil zhiPuAiUtil;
-
+    // 注入 VIP 线程池
+    @Resource
+    private Scheduler vipScheduler;
     // region 增删改查
 
     /**
@@ -329,7 +332,7 @@ public class QuestionController {
     // endregion
 
     @GetMapping("/ai_generate/sse")
-    public SseEmitter aiGenerateQuestionSSE(AiGenerateQuestionRequest aiGenerateQuestionRequest) {
+    public SseEmitter aiGenerateQuestionSSE(AiGenerateQuestionRequest aiGenerateQuestionRequest,HttpServletRequest request) {
         ThrowUtils.throwIf(aiGenerateQuestionRequest == null, ErrorCode.PARAMS_ERROR);
         // 获取参数
         Long appId = aiGenerateQuestionRequest.getAppId();
@@ -348,7 +351,17 @@ public class QuestionController {
         AtomicInteger count = new AtomicInteger(0);
         //拼接完整题目
         StringBuilder question = new StringBuilder();
-        modelDataFlowable.observeOn(Schedulers.io())
+
+        // 默认全局线程池
+        Scheduler scheduler = Schedulers.io();
+        User loginUser = userService.getLoginUser(request);
+        // 如果用户是 VIP，则使用定制线程池
+        if ("admin".equals(loginUser.getUserRole())) {
+            scheduler = vipScheduler;
+        }
+
+        // 订阅流，并处理数据
+        modelDataFlowable.observeOn(scheduler)
                 .map(modelData -> modelData.getChoices().get(0).getDelta().getContent())
                 .map(message -> message.replaceAll("\\s", ""))
                 .filter(StringUtils::isNotBlank)
@@ -383,4 +396,5 @@ public class QuestionController {
                 .subscribe();
         return sseEmitter;
     }
+
 }

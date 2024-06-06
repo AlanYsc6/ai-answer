@@ -41,7 +41,7 @@ spring:
       answer:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: ${ai.datasource.driver-class-name}
-        jdbc-url: jdbc:mysql://${ai.datasource.host}:${ai.datasource.port}/${ai.datasource.database}
+        jdbc-url: jdbc:mysql://${ai.datasource.host}:${ai.datasource.port}/${ai.datasource.database}?allowPublicKeyRetrieval=true&useSSL=false&autoReconnect=true&characterEncoding=utf8
         username: ${ai.datasource.username}
         password: ${ai.datasource.password}
     # 规则配置
