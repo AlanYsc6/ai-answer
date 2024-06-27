@@ -33,7 +33,7 @@ public class CustomScoreScoringStrategy implements ScoringStrategy {
      * 执行评分
      *
      * @param choices 用户选择的答案
-     * @param app    应用信息
+     * @param app     应用信息
      * @return 用户答题记录
      * @throws Exception
      */
@@ -56,20 +56,30 @@ public class CustomScoreScoringStrategy implements ScoringStrategy {
         List<QuestionContentDTO> questionContent = questionVO.getQuestionContent();
 
         // 遍历题目列表
-        for (QuestionContentDTO questionContentDTO : questionContent) {
-            // 遍历答案列表
-            for (String answer : choices) {
-                // 遍历题目中的选项
-                for (QuestionContentDTO.Option option : questionContentDTO.getOptions()) {
-                    // 如果答案和选项的key匹配
-                    if (option.getKey().equals(answer)) {
-                        int score = Optional.of(option.getScore()).orElse(0);
-                        totalScore += score;
-                    }
+//        for (QuestionContentDTO questionContentDTO : questionContent) {
+//            // 遍历答案列表
+//            for (String answer : choices) {
+//                // 遍历题目中的选项
+//                for (QuestionContentDTO.Option option : questionContentDTO.getOptions()) {
+//                    // 如果答案和选项的key匹配
+//                    if (option.getKey().equals(answer)) {
+//                        int score = Optional.of(option.getScore()).orElse(0);
+//                        totalScore += score;
+//                    }
+//                }
+//            }
+//        }
+        for (int i = 0, j = 0; i < questionContent.size() && j < choices.size(); i++, j++) {
+            // 遍历题目中的选项
+            for (QuestionContentDTO.Option option : questionContent.get(i).getOptions()) {
+                // 如果答案和选项的key匹配
+                if (option.getKey().equals(choices.get(j))) {
+                    int score = Optional.of(option.getScore()).orElse(0);
+                    totalScore += score;
+                    break;
                 }
             }
         }
-
         // 3. 遍历得分结果，找到第一个用户分数大于得分范围的结果，作为最终结果
         ScoringResult maxScoringResult = scoringResultList.get(0);
         for (ScoringResult scoringResult : scoringResultList) {
